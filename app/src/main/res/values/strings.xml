@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Live Alerts</string>
+    <string name="intro">Get a notification when these YouTube channels go live.</string>
+    <string name="input_hint">Handle or channel link</string>
+    <string name="input_placeholder">\@MrBeast</string>
+    <string name="add">Add</string>
+    <string name="count">Channels %1$d/%2$d</string>
+    <string name="full">Remove a channel to add another.</string>
+    <string name="empty">No channels yet. Add up to 5 above.</string>
+    <string name="remove">Remove</string>
+    <string name="remove_title">Remove %1$s?</string>
+    <string name="status_live">Live now</string>
+    <string name="status_offline">%1$s · Offline</string>
+    <string name="status_pending">%1$s · Not checked yet</string>
+    <string name="status_error">%1$s · Couldn\'t check</string>
+    <string name="live_badge">LIVE</string>
+    <string name="fast_title">Fast checks</string>
+    <string name="fast_summary">Every 3 minutes instead of every 15. Uses more battery and keeps a notification on screen.</string>
+    <string name="check_now">Check now</string>
+    <string name="checking">Checking…</string>
+    <string name="last_checked">Last checked %1$s</string>
+    <string name="battery">Allow running in background</string>
+    <string name="error_invalid">Enter a handle like \@MrBeast or a youtube.com channel link</string>
+    <string name="error_duplicate">Already added</string>
+    <string name="error_not_found">No YouTube channel found for that handle</string>
+    <string name="error_network">Couldn\'t reach YouTube. Check your connection.</string>
+    <string name="error_open">No app can open this link</string>
+    <string name="is_live">%1$s is live</string>
+    <string name="channel_live">Live alerts</string>
+    <string name="channel_service">Fast checking</string>
+    <string name="service_title">Watching for live streams</string>
+    <string name="service_text">Checking every 3 minutes</string>
+</resources>
