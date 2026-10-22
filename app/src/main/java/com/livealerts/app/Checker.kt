@@ -1,6 +1,7 @@
 package com.livealerts.app
 
 import android.content.Context
+import android.net.ConnectivityManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -15,8 +16,17 @@ object Checker {
     private val mutex = Mutex()
     private val parallel = Semaphore(4)
 
-    /** Checks every channel and notifies once per new live stream. */
-    suspend fun checkAll(ctx: Context) = mutex.withLock {
+    /** True when Wi-Fi only is on and the phone is on mobile data (or another metered network). */
+    fun pausedForData(ctx: Context) =
+        Store.isWifiOnly(ctx) &&
+            ctx.getSystemService(ConnectivityManager::class.java).isActiveNetworkMetered
+
+    /**
+     * Checks every channel and notifies once per new live stream.
+     * [force] is for an explicit "Check now", which runs even when paused for data.
+     */
+    suspend fun checkAll(ctx: Context, force: Boolean = false) = mutex.withLock {
+        if (!force && pausedForData(ctx)) return@withLock
         withContext(Dispatchers.IO) {
             // Network calls happen outside the store lock; results are merged in afterwards
             // so a channel added or removed meanwhile isn't lost or resurrected.

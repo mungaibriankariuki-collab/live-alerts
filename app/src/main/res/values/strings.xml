@@ -16,6 +16,9 @@
     <string name="live_badge">LIVE</string>
     <string name="fast_title">Fast checks</string>
     <string name="fast_summary">Every 3 minutes instead of every 15. Uses more battery and keeps a notification on screen.</string>
+    <string name="wifi_title">Wi-Fi only</string>
+    <string name="wifi_summary">Pause background checks on mobile data. Check now still works.</string>
+    <string name="paused_for_data">Paused on mobile data</string>
     <string name="check_now">Check now</string>
     <string name="checking">Checking…</string>
     <string name="last_checked">Last checked %1$s</string>

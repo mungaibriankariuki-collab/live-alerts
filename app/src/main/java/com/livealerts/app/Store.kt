@@ -21,6 +21,7 @@ object Store {
     const val MAX_CHANNELS = 20
     const val KEY_CHANNELS = "channels"
     private const val KEY_FAST = "fast_mode"
+    private const val KEY_WIFI_ONLY = "wifi_only"
     private val lock = Any()
 
     fun prefs(ctx: Context): SharedPreferences =
@@ -40,6 +41,12 @@ object Store {
 
     fun setFast(ctx: Context, fast: Boolean) {
         prefs(ctx).edit().putBoolean(KEY_FAST, fast).apply()
+    }
+
+    fun isWifiOnly(ctx: Context) = prefs(ctx).getBoolean(KEY_WIFI_ONLY, false)
+
+    fun setWifiOnly(ctx: Context, wifiOnly: Boolean) {
+        prefs(ctx).edit().putBoolean(KEY_WIFI_ONLY, wifiOnly).apply()
     }
 
     private fun encode(list: List<Channel>): String = JSONArray().apply {

@@ -31,21 +31,21 @@ object Scheduler {
                 ContextCompat.startForegroundService(ctx, service)
             } catch (e: IllegalStateException) {
                 // Android refused to start it from the background; fall back to normal checks.
-                enqueue(work)
+                enqueue(ctx, work)
             }
         } else {
             ctx.stopService(service)
-            enqueue(work)
+            enqueue(ctx, work)
         }
     }
 
-    private fun enqueue(work: WorkManager) {
+    private fun enqueue(ctx: Context, work: WorkManager) {
+        val network = if (Store.isWifiOnly(ctx)) NetworkType.UNMETERED else NetworkType.CONNECTED
         val request = PeriodicWorkRequestBuilder<CheckWorker>(15, TimeUnit.MINUTES)
-            .setConstraints(
-                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-            )
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(network).build())
             .build()
-        work.enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.KEEP, request)
+        // UPDATE keeps the schedule but applies a changed Wi-Fi only setting.
+        work.enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, request)
     }
 }
 

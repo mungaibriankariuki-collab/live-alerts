@@ -55,6 +55,12 @@ class MainActivity : AppCompatActivity() {
             Store.setFast(this, on)
             Scheduler.apply(this)
         }
+        b.wifiSwitch.isChecked = Store.isWifiOnly(this)
+        b.wifiSwitch.setOnCheckedChangeListener { _, on ->
+            Store.setWifiOnly(this, on)
+            Scheduler.apply(this)
+            refresh()
+        }
         b.checkNow.setOnClickListener { checkNow() }
         b.battery.setOnClickListener {
             startActivity(
@@ -96,7 +102,8 @@ class MainActivity : AppCompatActivity() {
         b.add.isEnabled = !full
         b.inputLayout.helperText = if (full) getString(R.string.full) else null
         val last = channels.maxOfOrNull { it.lastChecked } ?: 0
-        b.lastChecked.text = if (last == 0L) "" else getString(
+        b.lastChecked.text = if (Checker.pausedForData(this)) getString(R.string.paused_for_data)
+        else if (last == 0L) "" else getString(
             R.string.last_checked,
             DateUtils.getRelativeTimeSpanString(last, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS),
         )
@@ -140,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         b.checkNow.isEnabled = false
         b.checkNow.setText(R.string.checking)
         lifecycleScope.launch {
-            Checker.checkAll(applicationContext)
+            Checker.checkAll(applicationContext, force = true)
             b.checkNow.isEnabled = true
             b.checkNow.setText(R.string.check_now)
             refresh()
