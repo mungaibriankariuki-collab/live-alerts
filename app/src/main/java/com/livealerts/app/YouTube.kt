@@ -22,6 +22,8 @@ object YouTube {
         Regex("""<link rel="canonical" href="https://www\.youtube\.com/watch\?v=([\w-]{11})"""")
     private val titlePattern = Regex("""<meta name="title" content="([^"]*)"""")
     private val ogTitlePattern = Regex("""<meta property="og:title" content="([^"]*)"""")
+    private val streamedPattern =
+        Regex("""Streamed (\d+) (second|minute|hour|day|week|month|year)s? ago""")
     private val stopMarkers = listOf(
         "\"isLiveNow\":",
         "<link rel=\"canonical\" href=\"https://www.youtube.com/channel/",
@@ -50,6 +52,25 @@ object YouTube {
         val videoId = canonicalPattern.find(html)?.groupValues?.get(1) ?: return null
         val title = titlePattern.find(html)?.groupValues?.get(1)?.let(::unescape).orEmpty()
         return Live(videoId, title)
+    }
+
+    /**
+     * Approximate end of the channel's most recent stream, read from the Live tab's
+     * "Streamed 2 days ago" labels (newest first), or null if it has no past streams.
+     */
+    fun lastStreamed(path: String): Long? {
+        val html = get("https://www.youtube.com/$path/streams")
+        val m = streamedPattern.find(html) ?: return null
+        val unitMs = when (m.groupValues[2]) {
+            "second" -> 1_000L
+            "minute" -> 60_000L
+            "hour" -> 3_600_000L
+            "day" -> 86_400_000L
+            "week" -> 7 * 86_400_000L
+            "month" -> 30 * 86_400_000L
+            else -> 365 * 86_400_000L
+        }
+        return System.currentTimeMillis() - m.groupValues[1].toLong() * unitMs
     }
 
     fun channelUrl(path: String) = "https://www.youtube.com/$path"

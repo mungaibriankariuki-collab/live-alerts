@@ -11,6 +11,8 @@
     <string name="remove_title">Remove %1$s?</string>
     <string name="status_live">Live now</string>
     <string name="status_offline">%1$s · Offline</string>
+    <string name="status_last_live">%1$s · Last live %2$s</string>
+    <string name="status_never_live">%1$s · No past streams</string>
     <string name="status_pending">%1$s · Not checked yet</string>
     <string name="status_error">%1$s · Couldn\'t check</string>
     <string name="live_badge">LIVE</string>

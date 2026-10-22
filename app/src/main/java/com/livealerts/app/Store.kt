@@ -15,6 +15,8 @@ data class Channel(
     val lastNotifiedVideoId: String? = null,
     val lastChecked: Long = 0,
     val error: Boolean = false,
+    /** When the channel was last seen live; 0 = not known yet, -1 = no past streams. */
+    val lastLiveAt: Long = 0,
 )
 
 object Store {
@@ -60,6 +62,7 @@ object Store {
                 put("lastNotifiedVideoId", c.lastNotifiedVideoId ?: "")
                 put("lastChecked", c.lastChecked)
                 put("error", c.error)
+                put("lastLiveAt", c.lastLiveAt)
             })
         }
     }.toString()
@@ -78,6 +81,7 @@ object Store {
                 lastNotifiedVideoId = o.optString("lastNotifiedVideoId").ifEmpty { null },
                 lastChecked = o.optLong("lastChecked"),
                 error = o.optBoolean("error"),
+                lastLiveAt = o.optLong("lastLiveAt"),
             )
         }
     }

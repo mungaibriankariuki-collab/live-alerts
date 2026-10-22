@@ -1,5 +1,6 @@
 package com.livealerts.app
 
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +34,14 @@ class ChannelAdapter(
             c.live -> c.liveTitle?.ifEmpty { null } ?: ctx.getString(R.string.status_live)
             c.error -> ctx.getString(R.string.status_error, c.path)
             c.lastChecked == 0L -> ctx.getString(R.string.status_pending, c.path)
+            c.lastLiveAt > 0 -> ctx.getString(
+                R.string.status_last_live,
+                c.path,
+                DateUtils.getRelativeTimeSpanString(
+                    c.lastLiveAt, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
+                ),
+            )
+            c.lastLiveAt < 0 -> ctx.getString(R.string.status_never_live, c.path)
             else -> ctx.getString(R.string.status_offline, c.path)
         }
         holder.b.liveBadge.visibility = if (c.live) View.VISIBLE else View.GONE
