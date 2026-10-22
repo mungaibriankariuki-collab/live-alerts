@@ -6,7 +6,7 @@
     <string name="add">Add</string>
     <string name="count">Channels %1$d/%2$d</string>
     <string name="full">Remove a channel to add another.</string>
-    <string name="empty">No channels yet. Add up to 5 above.</string>
+    <string name="empty">No channels yet. Add up to 20 above.</string>
     <string name="remove">Remove</string>
     <string name="remove_title">Remove %1$s?</string>
     <string name="status_live">Live now</string>

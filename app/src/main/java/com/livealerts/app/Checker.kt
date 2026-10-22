@@ -2,20 +2,28 @@ package com.livealerts.app
 
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 
 object Checker {
     private val mutex = Mutex()
+    private val parallel = Semaphore(4)
 
     /** Checks every channel and notifies once per new live stream. */
     suspend fun checkAll(ctx: Context) = mutex.withLock {
         withContext(Dispatchers.IO) {
             // Network calls happen outside the store lock; results are merged in afterwards
             // so a channel added or removed meanwhile isn't lost or resurrected.
-            val results = Store.channels(ctx).associate { c ->
-                c.path to runCatching { YouTube.liveNow(c.path) }
+            val results = coroutineScope {
+                Store.channels(ctx).map { c ->
+                    async { parallel.withPermit { c.path to runCatching { YouTube.liveNow(c.path) } } }
+                }.awaitAll().toMap()
             }
             val now = System.currentTimeMillis()
             val toNotify = mutableListOf<Pair<Channel, YouTube.Live>>()

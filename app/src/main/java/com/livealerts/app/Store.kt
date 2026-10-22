@@ -18,7 +18,7 @@ data class Channel(
 )
 
 object Store {
-    const val MAX_CHANNELS = 5
+    const val MAX_CHANNELS = 20
     const val KEY_CHANNELS = "channels"
     private const val KEY_FAST = "fast_mode"
     private val lock = Any()

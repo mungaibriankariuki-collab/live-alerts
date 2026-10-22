@@ -22,6 +22,11 @@ object YouTube {
         Regex("""<link rel="canonical" href="https://www\.youtube\.com/watch\?v=([\w-]{11})"""")
     private val titlePattern = Regex("""<meta name="title" content="([^"]*)"""")
     private val ogTitlePattern = Regex("""<meta property="og:title" content="([^"]*)"""")
+    private val stopMarkers = listOf(
+        "\"isLiveNow\":",
+        "<link rel=\"canonical\" href=\"https://www.youtube.com/channel/",
+        "<link rel=\"canonical\" href=\"https://www.youtube.com/@",
+    )
 
     /** Turns a handle, channel ID or channel link into a path, or null if it isn't one. */
     fun parse(input: String): String? {
@@ -38,7 +43,9 @@ object YouTube {
     }
 
     fun liveNow(path: String): Live? {
-        val html = get("https://www.youtube.com/$path/live")
+        // Stop downloading once the answer is known: a channel canonical link means offline,
+        // and isLiveNow (after the canonical and title tags) settles a watch page.
+        val html = get("https://www.youtube.com/$path/live", stopMarkers)
         if (!html.contains("\"isLiveNow\":true")) return null
         val videoId = canonicalPattern.find(html)?.groupValues?.get(1) ?: return null
         val title = titlePattern.find(html)?.groupValues?.get(1)?.let(::unescape).orEmpty()
@@ -52,7 +59,8 @@ object YouTube {
     private fun unescape(s: String) =
         HtmlCompat.fromHtml(s, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
 
-    private fun get(url: String): String {
+    /** Downloads [url], stopping early once any of [stopAt] has been read. */
+    private fun get(url: String, stopAt: List<String> = emptyList()): String {
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 15_000
         conn.readTimeout = 30_000
@@ -68,7 +76,18 @@ object YouTube {
             val code = conn.responseCode
             if (code == 404) throw ChannelNotFoundException()
             if (code !in 200..299) throw IOException("HTTP $code")
-            return conn.inputStream.bufferedReader().use { it.readText() }
+            val page = StringBuilder()
+            val buf = CharArray(32 * 1024)
+            conn.inputStream.bufferedReader().use { reader ->
+                while (true) {
+                    val n = reader.read(buf)
+                    if (n < 0) break
+                    val from = maxOf(0, page.length - 100)
+                    page.appendRange(buf, 0, n)
+                    if (stopAt.any { page.indexOf(it, from) >= 0 }) break
+                }
+            }
+            return page.toString()
         } finally {
             conn.disconnect()
         }
